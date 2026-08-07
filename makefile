@@ -1,0 +1,34 @@
+# PLATFORM_DESKTOP
+# PLATFORM_WEB
+
+PLATFORM ?= PLATFORM_WEB
+
+ifeq ($(PLATFORM), PLATFORM_DESKTOP)
+	CC = gcc
+	SOURCES = ./src/*.c
+	CFLAGS = -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm
+	OUT = -o app.exe
+	RUN = ./app.exe
+endif
+
+ifeq ($(PLATFORM), PLATFORM_WEB)
+	CC = emcc
+	# need to include each file here to compile
+	SOURCES = ./src/main.c
+	CFLAGS = -Os -Wall -I include/ .\lib\libweblib.a -s USE_GLFW=3 --shell-file .\webShell\shell.html -DPLATFORM_WEB
+	OUT = -o index.html
+	RUN = emrun index.html
+endif
+
+DEBUG = -DDEBUG
+
+all: main run clean
+
+main:
+	$(CC) $(SOURCES) $(CFLAGS) $(DEBUG) $(OUT)
+
+run:
+	$(RUN)
+
+clean:
+	
