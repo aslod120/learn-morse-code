@@ -1,6 +1,5 @@
-#include "raylib.h"
+#include "bitbyte.h"
 
-//#define PLATFORM_WEB
 // encasing in if defined to do away with the squiggly red line
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -24,11 +23,30 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+    InitWindow(screenWidth, screenHeight, "Learn Morse Code");
+    
+    audio_init();
+    data_init();
+    play_init(.2);
+
+    
+    // add debug stuff here
+    /*
+    for(char i = 'a'; i <= 'z'; i++)
+    {
+        printf("%c: %s\n", i, data_get(i));
+    }
+    for(char i = '0'; i <= '9'; i++)
+    {
+        printf("%c: %s\n", i, data_get(i));
+    }
+    */
+    
 
     #if defined(PLATFORM_WEB)
         emscripten_set_main_loop(UpdateGame, 0, 1);
     #else
+        SetTargetFPS(60);
         while(!WindowShouldClose())
         {
             UpdateGame();
@@ -49,11 +67,18 @@ int main(void)
 //----------------------------------------------------------------------------------
 void UpdateGame(void)
 {
+    
     // Update
     //----------------------------------------------------------------------------------
     // TODO: Update your variables here
     //----------------------------------------------------------------------------------
+    audio_update();
+    play_update();
 
+    if(IsKeyPressed(KEY_SPACE))
+    {
+        play_start('a');
+    }
 
     // Draw
     //----------------------------------------------------------------------------------
