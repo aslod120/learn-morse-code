@@ -11,6 +11,8 @@
 const int screenWidth = 800;
 const int screenHeight = 450;
 
+char characterToPlay;
+
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
@@ -28,7 +30,6 @@ int main(void)
     audio_init();
     data_init();
     play_init(.2);
-
     
     // add debug stuff here
     /*
@@ -42,6 +43,7 @@ int main(void)
     }
     */
     
+    characterToPlay = 'A';
 
     #if defined(PLATFORM_WEB)
         emscripten_set_main_loop(UpdateGame, 0, 1);
@@ -77,7 +79,24 @@ void UpdateGame(void)
 
     if(IsKeyPressed(KEY_SPACE))
     {
-        play_start('a');
+        play_startChar(characterToPlay);
+    }
+
+    if(IsKeyPressed(KEY_UP))
+    {
+        characterToPlay++;
+        if(characterToPlay > 'Z')
+        {
+            characterToPlay = 'A';
+        }
+    }
+    if(IsKeyPressed(KEY_DOWN))
+    {
+        characterToPlay--;
+        if(characterToPlay < 'A')
+        {
+            characterToPlay = 'Z';
+        }
     }
 
     // Draw
@@ -86,7 +105,7 @@ void UpdateGame(void)
 
         ClearBackground(RAYWHITE);
 
-        DrawText("Hello World!", screenWidth/2, screenHeight/2, 20, BLACK);
+        DrawText(TextFormat("Letter: %c", characterToPlay), screenWidth/2, screenHeight/2, 20, BLACK);
 
     EndDrawing();
     //----------------------------------------------------------------------------------

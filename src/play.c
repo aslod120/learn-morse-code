@@ -8,7 +8,7 @@ Inter-character space (the gap between the characters of a word): 3 units
 Word space (the gap between two words): 7 units
 */
 
-void play_character(const char code);
+bool play_character(const char code);
 
 // units for how long each part should persist
 float baseUnit;
@@ -22,9 +22,14 @@ float baseWordSpace;
 char morseCodeChar; // the character we are going to play
 char *morseCodeStr; // the string of morse code in data.c
 int ind; // the index of the morse code string in data.c
+int wordInd; // index of word to play
+bool charPause; // pause between each characters of a word
 bool pause; // state to pause for the next dot/dash
 bool playingAudio; // state to determine if we are playing the morse code audio
+bool playingWord;
 float timer; // how long we should play the sine wave audio for
+
+char wordToPlay[20];
 
 
 // the smaller the speed is, the faster the words
@@ -34,16 +39,20 @@ void play_init(float speed)
     baseDit = baseUnit;
     baseDah = baseUnit * 3;
     baseToneSpace = baseUnit;
+    baseCharSpace = baseUnit * 3;
     baseWordSpace = baseUnit * 7;
     timer = 0;
 
     ind = 0;
+    wordInd = 0;
+    charPause = false;
     pause = false;
     playingAudio = false;
+    playingWord = false;
     morseCodeChar = 'a'; // default value
 }
 
-void play_start(char code)
+void play_startChar(char code)
 {
     playingAudio = true;
     morseCodeChar = code;
@@ -51,9 +60,12 @@ void play_start(char code)
     pause = false;
 }
 
-bool play_isPlaying()
+void play_startWord(char *word)
 {
-    return playingAudio;
+    wordInd = 0;
+    strcpy(wordToPlay, word);
+    playingWord = true;
+    play_startChar(word[wordInd]);
 }
 
 void play_update()
@@ -62,12 +74,28 @@ void play_update()
     {
         play_character(morseCodeChar);
     }
-
+    if(playingAudio == false && playingWord == true)
+    {
+        // letter stopped but we are still in the word
+        timer += GetFrameTime();
+        if(wordToPlay[wordInd + 1] == '\0')
+        {
+            playingWord = false;
+            timer = 0;
+        }
+        if(timer >= baseCharSpace)
+        {
+            wordInd++;
+            timer = 0;
+            play_startChar(wordToPlay[wordInd]);
+        }
+    }
 }
 
-// play the letter a
-void play_character(const char code)
+// returns true if it is done playing the character, false if not
+bool play_character(const char code)
 {
+    //printf("%d : %f\n", ind, GetTime());
     // dot, wait, dash
     morseCodeStr = data_get(code);
     if(morseCodeStr[ind] != '\0' && pause == false)
@@ -91,6 +119,15 @@ void play_character(const char code)
     if(pause == true)
     {
         timer += GetFrameTime();
+        if(morseCodeStr[ind + 1] == '\0')
+        {
+            pause = false;
+            ind = 0;
+            playingAudio = false;
+            timer = 0;
+            return true;
+        }
+
         if(timer >= baseToneSpace)
         {
             timer = 0;
@@ -99,11 +136,6 @@ void play_character(const char code)
         }
     }
 
-    if(morseCodeStr[ind] == '\0')
-    {
-        pause = false;
-        ind = 0;
-        playingAudio = false;
-    }
+    return false;
 
 }
