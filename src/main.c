@@ -12,6 +12,12 @@ const int screenWidth = 800;
 const int screenHeight = 450;
 
 char characterToPlay;
+char userInput;
+bool userAnswered;
+bool userAnsweredCorrectly;
+
+Font profaFont;
+float fontSize;
 
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
@@ -30,20 +36,24 @@ int main(void)
     audio_init();
     data_init();
     play_init(.2);
+    flashcard_init();
+    flashcard_shuffleDeck(1);    
+
+    // downloaded from (https://www.dafont.com/profa.font)
+    //profaFont = LoadFont("./fonts/ProfaTrial-Black.ttf");
+    fontSize = profaFont.baseSize;
+    if(IsFontValid(profaFont) == false)
+    {
+        profaFont = GetFontDefault();
+        fontSize = 20;
+    }
+
+    characterToPlay = flashcard_getCard();
+    userAnswered = false;
+    userAnsweredCorrectly = false;
     
     // add debug stuff here
-    /*
-    for(char i = 'a'; i <= 'z'; i++)
-    {
-        printf("%c: %s\n", i, data_get(i));
-    }
-    for(char i = '0'; i <= '9'; i++)
-    {
-        printf("%c: %s\n", i, data_get(i));
-    }
-    */
     
-    characterToPlay = 'A';
 
     #if defined(PLATFORM_WEB)
         emscripten_set_main_loop(UpdateGame, 0, 1);
@@ -81,31 +91,49 @@ void UpdateGame(void)
     {
         play_startChar(characterToPlay);
     }
-
-    if(IsKeyPressed(KEY_UP))
+    if(IsKeyPressed(KEY_ENTER) && userAnswered == true)
     {
-        characterToPlay++;
-        if(characterToPlay > 'Z')
-        {
-            characterToPlay = 'A';
-        }
+        // get a new character
+        characterToPlay = flashcard_getCard();
+        userAnswered = false;
     }
-    if(IsKeyPressed(KEY_DOWN))
+
+    userInput = GetCharPressed();
+    while(userInput > 0)
     {
-        characterToPlay--;
-        if(characterToPlay < 'A')
+        if(isalpha(userInput) && userAnswered == false)
         {
-            characterToPlay = 'Z';
+            userAnsweredCorrectly = flashcard_processAnswer(userInput, characterToPlay);
+            // want to stop processing answers after the player answered
+            userAnswered = true;
         }
+        userInput = GetCharPressed();
     }
 
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLACK);
 
-        DrawText(TextFormat("Letter: %c", characterToPlay), screenWidth/2, screenHeight/2, 20, BLACK);
+        //DrawText(TextFormat("Letter: %c", characterToPlay), screenWidth/2, screenHeight/2, 20, BLACK);
+        if(userAnswered == true)
+        {
+            if(userAnsweredCorrectly == true)
+            {
+                //DrawText("Correct!", screenWidth/2, screenHeight/2 - 40, 20, GREEN);
+                DrawTextEx(profaFont, "Correct!", (Vector2){screenWidth/2, screenHeight/2 - 40}, fontSize, 2, GREEN);
+            }
+            else if(userAnsweredCorrectly == false)
+            {
+                //DrawText("Incorrect!", screenWidth/2, screenHeight/2 - 40, 20, RED);
+                DrawTextEx(profaFont, "Incorrect!", (Vector2){screenWidth/2, screenHeight/2 - 40}, fontSize, 2, RED);
+            }
+            //DrawText(TextFormat("Letter: %c", characterToPlay), screenWidth/2, screenHeight/2, 20, RAYWHITE);
+            DrawTextEx(profaFont, TextFormat("Letter: %c", characterToPlay), (Vector2){screenWidth/2, screenHeight/2}, fontSize, 2, RAYWHITE);
+        }
+
+        flashcard_debug(20);
 
     EndDrawing();
     //----------------------------------------------------------------------------------

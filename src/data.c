@@ -5,6 +5,7 @@
 char data[36][6];
 void data_configureIndex(int index, const char *code);
 
+// returns the string code for input
 char* data_get(char code)
 {
     char *string = data[0]; // default setting
