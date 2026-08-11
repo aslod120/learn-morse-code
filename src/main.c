@@ -8,8 +8,8 @@
 //----------------------------------------------------------------------------------
 // Global Variables Definition
 //----------------------------------------------------------------------------------
-const int screenWidth = 800;
-const int screenHeight = 450;
+const int screenWidth = 1280;
+const int screenHeight = 720;
 
 char characterToPlay;
 char userInput;
@@ -18,6 +18,8 @@ bool userAnsweredCorrectly;
 
 Font profaFont;
 float fontSize;
+
+int WPM;
 
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
@@ -35,12 +37,15 @@ int main(void)
     
     audio_init();
     data_init();
-    play_init(.2);
+    play_init();
     flashcard_init();
-    flashcard_shuffleDeck(1);    
+    flashcard_shuffleDeck(1); 
+    
+    WPM = 10;
+    play_setWPM(WPM);
 
     // downloaded from (https://www.dafont.com/profa.font)
-    //profaFont = LoadFont("./fonts/ProfaTrial-Black.ttf");
+    profaFont = LoadFont("./fonts/ProfaTrial-Black.ttf");
     fontSize = profaFont.baseSize;
     if(IsFontValid(profaFont) == false)
     {
@@ -68,6 +73,7 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    audio_uninitialize();
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -133,7 +139,38 @@ void UpdateGame(void)
             DrawTextEx(profaFont, TextFormat("Letter: %c", characterToPlay), (Vector2){screenWidth/2, screenHeight/2}, fontSize, 2, RAYWHITE);
         }
 
-        flashcard_debug(20);
+        // draw buttons here
+        // frequency
+        DrawTextEx(profaFont, "Frequency", (Vector2){40, 0}, fontSize, 2, RAYWHITE);
+        DrawTextEx(profaFont, TextFormat("%d", audio_getFrequency()), (Vector2){75, 30}, fontSize, 2, RAYWHITE);
+        if(drawButton((Rectangle){20, 30, 50, 50}, " -", 30))
+        {
+            audio_changeFrequency(-10);
+        }
+        if(drawButton((Rectangle){145, 30, 50, 50}, " +", 30))
+        {
+            audio_changeFrequency(10);
+        }
+        // WPM
+        
+        DrawTextEx(profaFont, "WPM", (Vector2){70, 90}, fontSize, 2, RAYWHITE);
+        
+        DrawTextEx(profaFont, TextFormat("%d", WPM), (Vector2){90, 120}, fontSize, 2, RAYWHITE);
+        if(drawButton((Rectangle){20, 120, 50, 50}, " -", 30))
+        {
+            WPM--;
+            if(WPM < 5){WPM = 5;}
+            play_setWPM(WPM);
+        }
+        if(drawButton((Rectangle){145, 120, 50, 50}, " +", 30))
+        {
+            WPM++;
+            if(WPM > 30){WPM = 30;}
+            play_setWPM(WPM);
+        }
+
+        //flashcard_debug(20);
+
 
     EndDrawing();
     //----------------------------------------------------------------------------------

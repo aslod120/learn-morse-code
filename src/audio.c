@@ -39,6 +39,12 @@ void audio_init()
     sineStartTime = 0;
 }
 
+void audio_uninitialize()
+{
+    CloseAudioDevice();
+    UnloadAudioStream(stream);
+}
+
 void audio_update()
 {
     if(IsAudioStreamProcessed(stream))
@@ -72,4 +78,20 @@ void audio_stop()
     {
         PauseAudioStream(stream);
     }
+}
+
+void audio_changeFrequency(int amount)
+{
+    StopAudioStream(stream);
+    sineFrequency += amount;
+    if(sineFrequency < 400){sineFrequency = 400;}
+    if(sineFrequency > 700){sineFrequency = 700;}
+
+    PlayAudioStream(stream);
+    PauseAudioStream(stream);
+}
+
+int audio_getFrequency()
+{
+    return sineFrequency;
 }

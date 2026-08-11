@@ -1,24 +1,29 @@
 #include "bitbyte.h"
 
 #define DECK_LENGTH 36
-#define BASE_BOX2_REPEATING 4
-#define BASE_BOX3_REPEATING 10
+#define BASE_BOX2_REPEATING 3
+#define BASE_BOX3_REPEATING 4
+#define BASE_BOX4_REPEATING 10
 
 // this will hold the flashcard data that the user will be tested on
 // this will be based off the Leitner system https://en.wikipedia.org/wiki/Leitner_system
 
-int box1[DECK_LENGTH]; // where all the cards start out, these are the cards we need to review the most
+int box1[DECK_LENGTH]; // where all the cards start out
 int box1Length;
 
-int box2[DECK_LENGTH]; // cards we are getting right but still need to be repeated
+int box2[DECK_LENGTH]; // cards we get wrong that we need to review more
 int box2Length;
 
-int box3[DECK_LENGTH]; // cards we don't need to review as much
+int box3[DECK_LENGTH]; // cards we are getting right but still need to be repeated
 int box3Length;
+
+int box4[DECK_LENGTH]; // cards we don't need to review as much
+int box4Length;
 
 int currentBox;
 int box2RepeatingFactor;
 int box3RepeatingFactor;
+int box4RepeatingFactor;
 
 // when a card is correctly guessed, it is moved to the next box in the line.
 // if a card is incorrectly guessed, it is moved to box 1 for review.
@@ -30,9 +35,11 @@ void flashcard_init()
     box1Length = 26; // all cards are in box 1
     box2Length = 0;
     box3Length = 0;
+    box4Length = 0;
     currentBox = 1;
     box2RepeatingFactor = 0;
     box3RepeatingFactor = 0;
+    box4RepeatingFactor = 0;
 
     // initialize the reference indexes in box 1
     for(int i = 0; i < box1Length; i++)
@@ -44,17 +51,25 @@ void flashcard_init()
 
 void flashcard_debug(float size)
 {
+    DrawText("1: ", 0, 0, size, GREEN);
+    DrawText("2: ", 0, 20, size, GREEN);
+    DrawText("3: ", 0, 40, size, GREEN);
+    DrawText("4: ", 0, 60, size, GREEN);
     for(int i = 0; i < box1Length; i++)
     {
-        DrawText(TextFormat("%c ", box1[i] + 'A'), i * 20, 0, size, GREEN);
+        DrawText(TextFormat("%c ", box1[i] + 'A'), (i + 1) * 20, 0, size, GREEN);
     }
     for(int i = 0; i < box2Length; i++)
     {
-        DrawText(TextFormat("%c ", box2[i] + 'A'), i * 20, 20, size, GREEN);
+        DrawText(TextFormat("%c ", box2[i] + 'A'), (i + 1) * 20, 20, size, GREEN);
     }
     for(int i = 0; i < box3Length; i++)
     {
-        DrawText(TextFormat("%c ", box3[i] + 'A'), i * 20, 40, size, GREEN);
+        DrawText(TextFormat("%c ", box3[i] + 'A'), (i + 1) * 20, 40, size, GREEN);
+    }
+    for(int i = 0; i < box4Length; i++)
+    {
+        DrawText(TextFormat("%c ", box4[i] + 'A'), (i + 1) * 20, 60, size, GREEN);
     }
 }
 
@@ -79,11 +94,15 @@ void flashcard_shuffleDeck(int boxNumber)
     }
     if(boxNumber == 2)
     {
-        flashcard_shuffle(box2, box1Length);
+        flashcard_shuffle(box2, box2Length);
     }
     if(boxNumber == 3)
     {
-        flashcard_shuffle(box3, box1Length);
+        flashcard_shuffle(box3, box3Length);
+    }
+    if(boxNumber == 4)
+    {
+        flashcard_shuffle(box4, box4Length);
     }
 }
 
@@ -105,6 +124,11 @@ int flashcard_dequeue(int boxNum)
     {
         box3Length--;
         returnNum = box3[box3Length];
+    }
+    else if(boxNum == 4 && box4Length > 0)
+    {
+        box4Length--;
+        returnNum = box4[box4Length];
     }
 
     if(returnNum < 26) // it's a letter
@@ -168,7 +192,7 @@ int flashcard_queue(int boxNum, int card)
         return 1;
     }
 
-    if(boxNum == 3 && box1Length < DECK_LENGTH)
+    if(boxNum == 3 && box3Length < DECK_LENGTH)
     {
         for(int i = box3Length; i > 0; i--)
         {
@@ -176,6 +200,17 @@ int flashcard_queue(int boxNum, int card)
         }
         box3[0] = card;
         box3Length++;
+        return 1;
+    }
+
+    if(boxNum == 4 && box4Length < DECK_LENGTH)
+    {
+        for(int i = box4Length; i > 0; i--)
+        {
+            box4[i] = box4[i - 1];
+        }
+        box4[0] = card;
+        box4Length++;
         return 1;
     }
 
@@ -197,6 +232,10 @@ int flashcard_boxLength(int boxNum)
     {
         return box3Length;
     }
+    if(boxNum == 4)
+    {
+        return box4Length;
+    }
     // not a valid boxnum
     return 0;
 }
@@ -212,27 +251,27 @@ bool flashcard_processAnswer(char userInput, char answer)
         if(userInput == answer)
         {
             // player got it right, put it in the next box
-            if(currentBox == 1)
-            {
-                // put it in box 2
-                flashcard_queue(2, answer);
-            }
-            else if(currentBox == 2)
+            if(currentBox == 1 || currentBox == 2)
             {
                 // put it in box 3
                 flashcard_queue(3, answer);
             }
+            else if(currentBox == 3)
+            {
+                // put it in box 4
+                flashcard_queue(4, answer);
+            }
             else
             {
-                // leave it in box 3
-                flashcard_queue(3, answer);
+                // leave it in the last box
+                flashcard_queue(4, answer);
             }
             return true;
         }
         else
         {
-            // got it wrong, put it in box 1
-            flashcard_queue(1, answer);
+            // got it wrong, put it in box 2 for review
+            flashcard_queue(2, answer);
         }
     }
     // returns false if incorrect answer, or the answer isn't a letter/number
@@ -243,6 +282,7 @@ char flashcard_getCard()
 {
     currentBox = 1;
     box2RepeatingFactor++;
+    // box 2 is the review box if the user gets the flashcard wrong
     if(box2RepeatingFactor % BASE_BOX2_REPEATING == 0)
     {
         currentBox = 2;
@@ -250,18 +290,19 @@ char flashcard_getCard()
         if(box3RepeatingFactor % BASE_BOX3_REPEATING == 0)
         {
             currentBox = 3;
+            box4RepeatingFactor++;
+            if(box4RepeatingFactor % BASE_BOX4_REPEATING == 0)
+            {
+                currentBox = 4;
+            }
         }
     }
     // fallback to make sure we are choosing a box with actual stuff in it
-    for(int i = 0; i < 3; i++)
+    for(int i = 0; i < 4 && flashcard_boxLength(currentBox) <= 0; i++, currentBox++)
     {
-        if(flashcard_boxLength(currentBox) > 0)
-        {
-            break;
-        }
-        currentBox++;
-        if(currentBox > 3){currentBox = 1;}
+        if(currentBox > 4){currentBox = 1;}
     }
+    // if all else fails
     if(flashcard_boxLength(currentBox) == 0)
     {
         return 0;

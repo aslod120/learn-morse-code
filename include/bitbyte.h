@@ -2,6 +2,7 @@
 #define BITBYTE
 
 #include "raylib.h"
+#include "UIButtons.h"
 #include <math.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -9,16 +10,20 @@
 
 // ## audio ##
 void audio_init();
+void audio_uninitialize();
 void audio_update();
 void audio_play();
 void audio_stop();
+void audio_changeFrequency(int amount);
+int audio_getFrequency();
 
 // ## data ##
 void data_init();
 char* data_get(char code);
 
 // ## play ##
-void play_init(float speed);
+void play_init();
+void play_setWPM(int WPM);
 void play_update();
 void play_startChar(char code);
 void play_startWord(char *word);

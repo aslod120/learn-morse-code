@@ -33,9 +33,9 @@ char wordToPlay[20];
 
 
 // the smaller the speed is, the faster the words
-void play_init(float speed)
+void play_init()
 {
-    baseUnit = speed;
+    baseUnit = 1;
     baseDit = baseUnit;
     baseDah = baseUnit * 3;
     baseToneSpace = baseUnit;
@@ -50,6 +50,16 @@ void play_init(float speed)
     playingAudio = false;
     playingWord = false;
     morseCodeChar = 'a'; // default value
+}
+
+void play_setWPM(int WPM)
+{
+    baseUnit = 1200/((float)WPM * 1000);
+    baseDit = baseUnit;
+    baseDah = baseUnit * 3;
+    baseToneSpace = baseUnit;
+    baseCharSpace = baseUnit * 3;
+    baseWordSpace = baseUnit * 7;
 }
 
 void play_startChar(char code)
