@@ -112,13 +112,13 @@ bool play_character(const char code)
     {
         audio_play();
         timer += GetFrameTime();
-        if(morseCodeStr[ind] == 's' && timer >= baseDit) // dot
+        if(morseCodeStr[ind] == '.' && timer >= baseDit) // dot
         {
             audio_stop();
             pause = true;
             timer = 0;
         }
-        if(morseCodeStr[ind] == 'l' && timer >= baseDah) // dash
+        if(morseCodeStr[ind] == '-' && timer >= baseDah) // dash
         {
             audio_stop();
             pause = true;

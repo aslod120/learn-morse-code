@@ -12,6 +12,7 @@ const int screenWidth = 1280;
 const int screenHeight = 720;
 
 char characterToPlay;
+char *characterCode;
 char userInput;
 bool userAnswered;
 bool userAnsweredCorrectly;
@@ -54,6 +55,7 @@ int main(void)
     }
 
     characterToPlay = flashcard_getCard();
+    characterCode = data_get(characterToPlay);
     userAnswered = false;
     userAnsweredCorrectly = false;
     
@@ -127,16 +129,16 @@ void UpdateGame(void)
         {
             if(userAnsweredCorrectly == true)
             {
-                //DrawText("Correct!", screenWidth/2, screenHeight/2 - 40, 20, GREEN);
                 DrawTextEx(profaFont, "Correct!", (Vector2){screenWidth/2, screenHeight/2 - 40}, fontSize, 2, GREEN);
             }
             else if(userAnsweredCorrectly == false)
             {
-                //DrawText("Incorrect!", screenWidth/2, screenHeight/2 - 40, 20, RED);
                 DrawTextEx(profaFont, "Incorrect!", (Vector2){screenWidth/2, screenHeight/2 - 40}, fontSize, 2, RED);
             }
             //DrawText(TextFormat("Letter: %c", characterToPlay), screenWidth/2, screenHeight/2, 20, RAYWHITE);
             DrawTextEx(profaFont, TextFormat("Letter: %c", characterToPlay), (Vector2){screenWidth/2, screenHeight/2}, fontSize, 2, RAYWHITE);
+            // draw the dots and dashes too
+            DrawTextEx(profaFont, TextFormat("%s", characterCode), (Vector2){screenWidth/2, screenHeight/2 + 30}, fontSize, 10, RAYWHITE);
         }
 
         // draw buttons here
