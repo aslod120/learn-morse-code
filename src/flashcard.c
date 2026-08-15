@@ -51,25 +51,25 @@ void flashcard_init()
 
 void flashcard_debug(float size)
 {
-    DrawText("1: ", 0, 0, size, GREEN);
-    DrawText("2: ", 0, 20, size, GREEN);
-    DrawText("3: ", 0, 40, size, GREEN);
-    DrawText("4: ", 0, 60, size, GREEN);
+    DrawText("1: ", 0, 500, size, GREEN);
+    DrawText("2: ", 0, 520, size, GREEN);
+    DrawText("3: ", 0, 540, size, GREEN);
+    DrawText("4: ", 0, 560, size, GREEN);
     for(int i = 0; i < box1Length; i++)
     {
-        DrawText(TextFormat("%c ", box1[i] + 'A'), (i + 1) * 20, 0, size, GREEN);
+        DrawText(TextFormat("%c ", box1[i] + 'A'), (i + 1) * 20, 500, size, GREEN);
     }
     for(int i = 0; i < box2Length; i++)
     {
-        DrawText(TextFormat("%c ", box2[i] + 'A'), (i + 1) * 20, 20, size, GREEN);
+        DrawText(TextFormat("%c ", box2[i] + 'A'), (i + 1) * 20, 520, size, GREEN);
     }
     for(int i = 0; i < box3Length; i++)
     {
-        DrawText(TextFormat("%c ", box3[i] + 'A'), (i + 1) * 20, 40, size, GREEN);
+        DrawText(TextFormat("%c ", box3[i] + 'A'), (i + 1) * 20, 540, size, GREEN);
     }
     for(int i = 0; i < box4Length; i++)
     {
-        DrawText(TextFormat("%c ", box4[i] + 'A'), (i + 1) * 20, 60, size, GREEN);
+        DrawText(TextFormat("%c ", box4[i] + 'A'), (i + 1) * 20, 560, size, GREEN);
     }
 }
 
@@ -158,7 +158,7 @@ int flashcard_queue(int boxNum, int card)
         card = toupper(card);
         card -= 'A';
     }
-    else // it's a number
+    else if(isdigit(card)) // it's a number
     {
         if(card == '0')
         {
@@ -309,4 +309,38 @@ char flashcard_getCard()
     }
 
     return flashcard_dequeue(currentBox);
+}
+
+void flashcard_clearBox(int box)
+{
+    switch (box)
+    {
+    case 1:
+        box1Length = 0;
+        break;
+    case 2:
+        box2Length = 0;
+        break;
+    case 3:
+        box3Length = 0;
+        break;
+    case 4:
+        box4Length = 0;
+        break;
+    
+    default:
+        break;
+    }
+}
+
+void flashcard_clearAllBoxes()
+{
+    flashcard_clearBox(1);
+    flashcard_clearBox(2);
+    flashcard_clearBox(3);
+    flashcard_clearBox(4);
+
+    box2RepeatingFactor = 0;
+    box3RepeatingFactor = 0;
+    box4RepeatingFactor = 0;
 }

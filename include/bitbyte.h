@@ -7,6 +7,9 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+#include "boolbits.h"
+
+#define BACKGROUND ((Color){42, 45, 46, 255})
 
 // ## audio ##
 void audio_init();
@@ -35,8 +38,21 @@ int flashcard_queue(int boxNum, int card);
 int flashcard_boxLength(int boxNum);
 bool flashcard_processAnswer(char userInput, char answer);
 char flashcard_getCard();
+void flashcard_clearAllBoxes();
 
 void flashcard_debug(float size);
+
+// ## engine ##
+void engine_init();
+void engine_update();
+void engine_draw();
+void engine_uninitialize();
+
+typedef enum states
+{
+    morseCode,
+    settings
+}states;
 
 
 #endif
