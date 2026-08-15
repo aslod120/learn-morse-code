@@ -6,7 +6,7 @@ PLATFORM ?= PLATFORM_DESKTOP
 ifeq ($(PLATFORM), PLATFORM_DESKTOP)
 	CC = gcc
 	SOURCES = ./src/*.c
-	CFLAGS = -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm
+	CFLAGS = -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows -Wall -Wfloat-equal -Werror -Os
 	OUT = -o app.exe
 	RUN = ./app.exe
 endif
