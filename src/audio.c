@@ -16,6 +16,7 @@
 ********************************************************************************************/
 
 #include "bitbyte.h"
+#include <math.h> // PI, sinf
 
 #define BUFFER_SIZE 4096
 #define SAMPLE_RATE 44100

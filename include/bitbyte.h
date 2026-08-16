@@ -1,13 +1,10 @@
 #ifndef BITBYTE
 #define BITBYTE
 
+#include "boolbits.h"
+#include <ctype.h> // isalpha, toupper
 #include "raylib.h"
 #include "UIButtons.h"
-#include <math.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include "boolbits.h"
 
 #define BACKGROUND ((Color){42, 45, 46, 255})
 

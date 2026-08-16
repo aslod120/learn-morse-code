@@ -1,4 +1,5 @@
 #include "bitbyte.h"
+#include <string.h> // strcpy
 
 /*
 Dit: 1 unit
